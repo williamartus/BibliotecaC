@@ -12,6 +12,7 @@ int main(){
   while(1){
     printMenu();
     scanf("%d", &op);
+    
   }
   return 0;
 }
