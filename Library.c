@@ -50,9 +50,8 @@ int printLUVMenu(){
 }
 
 void freeMemory(Sent *s){
-
+  
 }
-
 void Cad(Sent *s){
   int op;
   while(1){
@@ -143,6 +142,38 @@ int printLUEVMenu(){
   return op;
 }
 
+ListB *searchBookID(Sent *s, int id){
+  ListB *aux=s->firstB;
+  for(aux;aux->next!=NULL;aux=aux->next){
+    if(aux->book->id=id){
+      printf("Livro encontrado!:\n");
+      return aux;
+    }
+  }
+  printf("Livro não encontrado!\n");
+}
+
+ListB *searchBookAu(Sent *s, char *au){
+  ListB *aux=s->firstB;
+  ListB *AuBooks[s->qtBooks];
+  int j=0;
+  for(aux;aux->next!=NULL; aux=aux->next){
+    int same=1;
+    for(int i=0;aux->book->author[i]!='\0' || au[i]!='\0';i++){
+      if(aux->book->author[i]!=au[i]){
+        same=0;
+        break;
+      }
+    }
+    if(same==1){
+      AuBooks[j]=aux->book;
+      j++;
+    }
+  }
+  if(j==0)printf("Autor não encontrado!\n");
+  return AuBooks;//retorna lista de ponteiros
+}
+
 void Con(Sent *s){
   int op;
   while(1){
@@ -150,7 +181,28 @@ void Con(Sent *s){
     op=printLUEVMenu();
     if(op==0) return;
     if(op==1){//livro
-
+      int op2;
+      printf("Deseja pesquisar por:\n(1)ID\n(2)Autor\n");
+      scanf("%d", &op2);
+      if(op2==1){
+        int id;
+        ListB *b;
+        printf("Digite o ID do livro:\n");
+        scanf("%d", &id);
+        b=searchBookID(s, id);
+        printf("%s\n", b->book->title);
+      }
+      if(op2==2){
+        char au[SIZEAUTHOR];
+        ListB *aubooks;
+        printf("Digite o nome do Autor:\n");
+        scanf("%s", au);
+        aubooks=searchBookAu(s, au);
+        for(ListB *aux=aubooks;aux!=NULL;aux=aux->next){
+          printf("%s\n",aux->book->title);
+        }
+      }
+      return;
     }
     if(op==2){//usuário
 
