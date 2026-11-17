@@ -144,20 +144,21 @@ int printLUEVMenu(){
 
 ListB *searchBookID(Sent *s, int id){
   ListB *aux=s->firstB;
-  for(aux;aux->next!=NULL;aux=aux->next){
-    if(aux->book->id=id){
+  for(;aux->next!=NULL;aux=aux->next){
+    if(aux->book->id==id){
       printf("Livro encontrado!:\n");
       return aux;
     }
   }
   printf("Livro não encontrado!\n");
+  return NULL;
 }
 
 ListB *searchBookAu(Sent *s, char *au){
   ListB *aux=s->firstB;
   ListB *AuBooks[s->qtBooks];
   int j=0;
-  for(aux;aux->next!=NULL; aux=aux->next){
+  for(;aux->next!=NULL; aux=aux->next){
     int same=1;
     for(int i=0;aux->book->author[i]!='\0' || au[i]!='\0';i++){
       if(aux->book->author[i]!=au[i]){
@@ -166,12 +167,12 @@ ListB *searchBookAu(Sent *s, char *au){
       }
     }
     if(same==1){
-      AuBooks[j]=aux->book;
+      AuBooks[j]=aux;
       j++;
     }
   }
   if(j==0)printf("Autor não encontrado!\n");
-  return AuBooks;//retorna lista de ponteiros
+  return AuBooks[0];//retorna lista de ponteiros
 }
 
 void Con(Sent *s){
