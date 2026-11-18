@@ -326,12 +326,76 @@ void Atu(Sent *s){
     op=printLUVMenu();
     if(op==0) return;
     if(op==1){//livro
-      /*Titulo 
-      Autor  
-      Ano */
+      int op2, id;
+      printf("Digite o ID do livro que deseja alterar: ");
+      scanf("%d", &id);
+      ListB *b=searchBookID(s, id);
+      if(b==NULL) break;
+      printf("Selecione o que deseja alterar:\n(1)Título\n(2)Autor\n(3)Ano\n(4)Todos os anteriores\n");
+      scanf("%d", &op2);
+      if(op2==1){
+        char t[SIZETITLE];
+        printf("Digite o novo título: ");
+        scanf("%s", t);
+        for(int i=0;b->book->title[i]!='\0';i++){
+          b->book->title[i]=t[i];
+          if(t[i]!='\0')b->book->title[i]='\0';
+        }
+        printf("Título alterado com sucesso!\n");
+      }
+      if(op2==2){
+        char a[SIZEAUTHOR];
+        printf("Digite o novo Autor: ");
+        scanf("%s", a);
+        for(int i=0;b->book->author[i]!='\0';i++){
+          b->book->author[i]=a[i];
+          if(a[i]!='\0')b->book->author[i]='\0';
+        }
+        printf("Autor alterado com sucesso!\n");
+      }
+      if(op2==3){
+        int y;
+        printf("Digite o novo Ano: ");
+        scanf("%d", &y);
+        b->book->year=y;
+        printf("Ano alterado com sucesso!\n");
+      }
+      if(op2==4){
+        char t[SIZETITLE], a[SIZEAUTHOR];
+        int y;
+        printf("Digite o novo título: ");
+        scanf("%s", t);
+        for(int i=0;b->book->title[i]!='\0';i++){
+          b->book->title[i]=t[i];
+          if(t[i]!='\0')b->book->title[i]='\0';
+        }
+        printf("Título alterado com sucesso!\n");
+        printf("Digite o novo Autor: ");
+        scanf("%s", a);
+        for(int i=0;b->book->author[i]!='\0';i++){
+          b->book->author[i]=a[i];
+          if(a[i]!='\0')b->book->author[i]='\0';
+        }
+        printf("Autor alterado com sucesso!\n");
+        printf("Digite o novo Ano: ");
+        scanf("%d", &y);
+        b->book->year=y;
+        printf("Ano alterado com sucesso!\n");
+      }
     }
     if(op==2){//usuário
-      //nome
+      char e[SIZEMAIL];
+      printf("Digite o email do usuário a ser atualizado: ");
+      scanf("%s", e);
+      ListU *u=searchUemail(s, e);
+      char n[SIZEUNAME];
+      printf("Digite o novo nome do usuário: ");
+      scanf("%s", n);
+      for(int i=0;u->user->uname[i]!='\0';i++){
+          u->user->uname[i]=n[i];
+          if(n[i]!='\0')u->user->uname[i]='\0';
+        printf("Nome alterado com sucesso!\n");
+      }
     }
   }
 }
