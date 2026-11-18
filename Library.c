@@ -171,8 +171,64 @@ ListB *searchBookAu(Sent *s, char *au){
       j++;
     }
   }
-  if(j==0)printf("Autor não encontrado!\n");
+  if(j==0){
+    printf("Autor não encontrado!\n");
+    return NULL;
+  }
   return AuBooks[0];//retorna lista de ponteiros
+}
+
+ListU *searchUemail(Sent *s, char *em){
+  for(ListU *aux=s->firstU;aux!=NULL;aux=aux->next){
+    int same=1;
+    for(int i=0;aux->user->email[i]!='\0' || em[i]!='\0';i++){
+      if(aux->user->email[i]!=em[i]){
+        same=0;
+        break;
+      }
+    }
+    if(same==1) return aux;
+  }
+  printf("Usuário não encontrado!\n");
+  return NULL;
+}
+
+ListU *searchUname(Sent *s, char *name){
+  for(ListU *aux=s->firstU;aux!=NULL;aux=aux->next){
+    int same=1;
+    for(int i=0;aux->user->uname[i]!='\0' || name[i]!='\0';i++){
+      if(aux->user->uname[i]!=name[i]){
+        same=0;
+        break;
+      }
+    }
+    if(same==1) return aux;
+  }
+  printf("Usuário não cadastrado!\n");
+  return NULL;
+}
+
+ListB *searchUemp(Sent *s, char *em){
+  ListB *UBooks[s->qtBooks];
+  int j=0;
+  for(ListB *aux=s->firstB;aux!=NULL;aux=aux->next){
+    int same=1;
+    for(int i=0;aux->book->userb->email[i]!='\0' || em[i]!='\0';i++){
+      if(aux->book->userb->email[i]!=em[i]){
+        same=0;
+        break;
+      }
+    }
+    if(same==1){
+      UBooks[j]=aux;
+      j++;
+    }
+  }
+  if(j==0){
+    printf("Usuário não emprestou nenhum livro!\n");
+    return NULL;
+  }
+  return UBooks[0];//retorna lista de ponteiros
 }
 
 void Con(Sent *s){
@@ -185,31 +241,80 @@ void Con(Sent *s){
       int op2;
       printf("Deseja pesquisar por:\n(1)ID\n(2)Autor\n");
       scanf("%d", &op2);
-      if(op2==1){
+      if(op2==1){//id
         int id;
         ListB *b;
-        printf("Digite o ID do livro:\n");
+        printf("Digite o ID do livro: ");
         scanf("%d", &id);
         b=searchBookID(s, id);
-        printf("%s\n", b->book->title);
+        printf("Título: %s\n",b->book->title);
+        printf("Ano: %d\n",b->book->year);          
+        printf("Autor: %s\n",b->book->author);
+        printf("ID: %d\n",b->book->id);
+        if(b->book->status==1){
+          printf("Status: Emprestado\n");
+          printf("Emprestado por %s\n",b->book->userb->uname);
+        }else printf("Status: Disponível\n");
       }
-      if(op2==2){
+      if(op2==2){//autor
         char au[SIZEAUTHOR];
         ListB *aubooks;
-        printf("Digite o nome do Autor:\n");
+        printf("Digite o nome do Autor: ");
         scanf("%s", au);
         aubooks=searchBookAu(s, au);
-        for(ListB *aux=aubooks;aux!=NULL;aux=aux->next){
-          printf("%s\n",aux->book->title);
+        for(ListB *aux=aubooks;aux!=NULL;aux=aux+1){
+          printf("Título: %s\n",aux->book->title);
+          printf("Ano: %d\n",aux->book->year);          
+          printf("Autor: %s\n",aux->book->author);
+          printf("ID: %d\n",aux->book->id);
+          if(aux->book->status==1){
+            printf("Status: Emprestado\n");
+            printf("Emprestado por %s\n",aux->book->userb->uname);
+          }else printf("Status: Disponível\n");
         }
       }
       return;
     }
     if(op==2){//usuário
-
+      int op2;
+      printf("Deseja pesquisar por:\n(1)Email\n(2)Nome\n");
+      scanf("%d", &op2);
+      if(op2==1){//email
+        char em[SIZEMAIL];
+        printf("Digite o Email do usuário: ");
+        scanf("%s", em);
+        ListU *u=searchUemail(s, em);
+        printf("Nome: %s",u->user->uname);
+        printf("Email: %s",u->user->email);
+      }
+      if(op2==2){//nome
+        char na[SIZEUNAME];
+        printf("Digite o Nome do usuário: ");
+        scanf("%s", na);
+        ListU *u=searchUname(s, na);
+        printf("Nome: %s",u->user->uname);
+        printf("Email: %s",u->user->email);
+      }
+      return;
     }
     if(op==3){//empréstimo
-
+      char em[SIZEMAIL];
+        printf("Digite o Email do usuário: ");
+        scanf("%s", em);
+        ListB *bks=searchUemp(s, em);
+        int i=1;
+        for(ListB *aux=bks;aux!=NULL;aux=aux+1){//precisa pular um espaço do vetor
+          printf("==Livro %d==\n", i);
+          printf("Título: %s\n",aux->book->title);
+          printf("Ano: %ds\n",aux->book->year);          
+          printf("Autor: %s\n",aux->book->author);
+          printf("ID: %d\n",aux->book->id);
+          if(aux->book->status==1){
+            printf("Status: Emprestado\n");
+            printf("Emprestado por %s\n",aux->book->userb->uname);
+          }else printf("Status: Disponível\n");
+          i++;
+        }
     }
   }
 }
