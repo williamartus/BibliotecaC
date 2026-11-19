@@ -69,9 +69,8 @@ ListB *searchBookID(Sent *s, int id){
   return NULL;
 }
 
-ListB *searchBookAu(Sent *s, char *au){
+void printBookAu(Sent *s, char *au){
   ListB *aux=s->firstB;
-  ListB *AuBooks[s->qtBooks];
   int j=0;
   for(;aux!=NULL; aux=aux->next){
     int same=1;
@@ -82,15 +81,19 @@ ListB *searchBookAu(Sent *s, char *au){
       }
     }
     if(same==1){
-      AuBooks[j]=aux;
+      printf("==Livro %d==\n", j);
+      printf("Título: %s\n",aux->book->title);
+      printf("Ano: %d\n",aux->book->year);          
+      printf("Autor: %s\n",aux->book->author);
+      printf("ID: %d\n",aux->book->id);
+      if(aux->book->status==1){
+        printf("Status: Emprestado\n");
+        printf("Emprestado por %s\n",aux->book->userb->uname);
+      }else printf("Status: Disponível\n");
       j++;
     }
   }
-  if(j==0){
-    printf("Autor não encontrado!\n");
-    return NULL;
-  }
-  return AuBooks[0];//retorna lista de ponteiros
+  if(j==0) printf("Autor não encontrado!\n");
 }
 
 ListU *searchUemail(Sent *s, char *em){
@@ -123,27 +126,32 @@ ListU *searchUname(Sent *s, char *name){
   return NULL;
 }
 
-ListB *searchUemp(Sent *s, char *em){
-  ListB *UBooks[s->qtBooks];
+void printUemp(Sent *s, char *em){
   int j=0;
   for(ListB *aux=s->firstB;aux!=NULL;aux=aux->next){
     int same=1;
-    for(int i=0;aux->book->userb->email[i]!='\0' || em[i]!='\0';i++){
-      if(aux->book->userb->email[i]!=em[i]){
-        same=0;
-        break;
+    if(aux->book->status==1){
+      for(int i=0;aux->book->userb->email[i]!='\0' || em[i]!='\0';i++){
+        if(aux->book->userb->email[i]!=em[i]){
+          same=0;
+          break;
+        }
+      }
+      if(same==1){
+        printf("==Livro %d==\n", j);
+        printf("Título: %s\n",aux->book->title);
+        printf("Ano: %ds\n",aux->book->year);          
+        printf("Autor: %s\n",aux->book->author);
+        printf("ID: %d\n",aux->book->id);
+        if(aux->book->status==1){
+          printf("Status: Emprestado\n");
+          printf("Emprestado por %s\n",aux->book->userb->uname);
+        }else printf("Status: Disponível\n");
+        j++;
       }
     }
-    if(same==1){
-      UBooks[j]=aux;
-      j++;
-    }
   }
-  if(j==0){
-    printf("Usuário não emprestou nenhum livro!\n");
-    return NULL;
-  }
-  return UBooks[0];//retorna lista de ponteiros
+  if(j==0)printf("Usuário não emprestou nenhum livro!\n");
 }
 
 void freeMemory(Sent *s){
@@ -204,7 +212,6 @@ void Cad(Sent *s){
     }
     if(op==2){//usuário
       ListU *unew;
-      int fail=0;
       unew=(ListU *)malloc(sizeof(ListU));
       unew->user=(User *)malloc(sizeof(User));
 
@@ -214,12 +221,10 @@ void Cad(Sent *s){
       ListU *u=searchUemail(s, unew->user->email);
       if(u!=NULL){
         printf("Email já existente!\n");
-        Sent u={unew,unew, NULL, NULL,1,0};
-        freeMemory(&u);
-        fail=1;
+        free(unew->user);
+        free(unew);
         break;
       }
-      if(fail==1)break;
       printf("Nome (sem espaços): ");
       scanf("%s", unew->user->uname);
 
@@ -282,23 +287,10 @@ void Con(Sent *s){
       }
       if(op2==2){//autor
         char au[SIZEAUTHOR];
-        ListB *aubooks;
         printf("Digite o nome do Autor: ");
         scanf("%s", au);
-        aubooks=searchBookAu(s, au);
-        if(aubooks==NULL) return;
-        for(ListB *aux=aubooks;aux!=NULL;aux=aux+(sizeof(ListB))){
-          printf("Título: %s\n",aux->book->title);
-          printf("Ano: %d\n",aux->book->year);          
-          printf("Autor: %s\n",aux->book->author);
-          printf("ID: %d\n",aux->book->id);
-          if(aux->book->status==1){
-            printf("Status: Emprestado\n");
-            printf("Emprestado por %s\n",aux->book->userb->uname);
-          }else printf("Status: Disponível\n");
-        }
+        printBookAu(s, au);
       }
-      return;
     }
     if(op==2){//usuário
       int op2;
@@ -322,27 +314,12 @@ void Con(Sent *s){
         printf("Nome: %s",u->user->uname);
         printf("Email: %s",u->user->email);
       }
-      return;
     }
     if(op==3){//empréstimo
       char em[SIZEMAIL];
         printf("Digite o Email do usuário: ");
         scanf("%s", em);
-        ListB *bks=searchUemp(s, em);
-        if(bks==NULL) return;
-        int i=1;
-        for(ListB *aux=bks;aux!=NULL;aux=aux+(sizeof(ListB))){//precisa pular um espaço do vetor
-          printf("==Livro %d==\n", i);
-          printf("Título: %s\n",aux->book->title);
-          printf("Ano: %ds\n",aux->book->year);          
-          printf("Autor: %s\n",aux->book->author);
-          printf("ID: %d\n",aux->book->id);
-          if(aux->book->status==1){
-            printf("Status: Emprestado\n");
-            printf("Emprestado por %s\n",aux->book->userb->uname);
-          }else printf("Status: Disponível\n");
-          i++;
-        }
+        printUemp(s, em);
     }
   }
 }
@@ -365,20 +342,22 @@ void Atu(Sent *s){
         char t[SIZETITLE];
         printf("Digite o novo título: ");
         scanf("%s", t);
-        for(int i=0;b->book->title[i]!='\0';i++){
+        int i;
+        for(i=0;t[i]!='\0';i++){
           b->book->title[i]=t[i];
-          if(t[i]!='\0')b->book->title[i]='\0';
         }
+        b->book->title[i]='\0';
         printf("Título alterado com sucesso!\n");
       }
       if(op2==2){
         char a[SIZEAUTHOR];
         printf("Digite o novo Autor: ");
         scanf("%s", a);
-        for(int i=0;b->book->author[i]!='\0';i++){
+        int i;
+        for(i=0;a[i]!='\0';i++){
           b->book->author[i]=a[i];
-          if(a[i]!='\0')b->book->author[i]='\0';
         }
+        b->book->author[i]='\0';
         printf("Autor alterado com sucesso!\n");
       }
       if(op2==3){
@@ -393,17 +372,18 @@ void Atu(Sent *s){
         int y;
         printf("Digite o novo título: ");
         scanf("%s", t);
-        for(int i=0;b->book->title[i]!='\0';i++){
+        int i;
+        for(i=0;t[i]!='\0';i++){
           b->book->title[i]=t[i];
-          if(t[i]!='\0')b->book->title[i]='\0';
         }
+        b->book->title[i]='\0';
         printf("Título alterado com sucesso!\n");
         printf("Digite o novo Autor: ");
         scanf("%s", a);
-        for(int i=0;b->book->author[i]!='\0';i++){
+        for(i=0;a[i]!='\0';i++){
           b->book->author[i]=a[i];
-          if(a[i]!='\0')b->book->author[i]='\0';
         }
+        b->book->author[i]='\0';
         printf("Autor alterado com sucesso!\n");
         printf("Digite o novo Ano: ");
         scanf("%d", &y);
@@ -420,11 +400,12 @@ void Atu(Sent *s){
       char n[SIZEUNAME];
       printf("Digite o novo nome do usuário: ");
       scanf("%s", n);
-      for(int i=0;u->user->uname[i]!='\0';i++){
+      int i;
+      for(i=0;n[i]!='\0';i++){
           u->user->uname[i]=n[i];
-          if(n[i]!='\0')u->user->uname[i]='\0';
-        printf("Nome alterado com sucesso!\n");
       }
+      u->user->uname[i]='\0';
+      printf("Nome alterado com sucesso!\n");
     }
   }
 }
@@ -479,11 +460,10 @@ void Exc(Sent *s){
       scanf("%s", em);
       ListU *u=searchUemail(s, em);
       if(u==NULL) return;
-      ListB *bks=searchUemp(s, em);
-      if(bks!=NULL){
-        for(ListB *aux=bks;aux!=NULL;aux=aux+(sizeof(ListB))){
-          bks->book->userb=NULL;
-          bks->book->status=0;
+      for(ListB *i=s->firstB;i!=NULL;i=i->next){
+        if(i->book->userb==u->user){
+          i->book->userb=NULL;
+          i->book->status=0;
         }
       }
       ListU *aux=u;
