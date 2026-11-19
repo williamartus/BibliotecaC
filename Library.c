@@ -36,6 +36,15 @@ typedef struct tsent{
   int qtUsers, qtBooks;
 }Sent;
 
+void initLists(Sent *s){
+  s->firstU=NULL;
+  s->lastU=NULL;
+  s->firstB=NULL;
+  s->lastB=NULL;
+  s->qtUsers=0;
+  s->qtBooks=0;
+}
+
 int printLUVMenu(){
   int op;
   printf("1. Livros\n");
@@ -48,103 +57,9 @@ int printLUVMenu(){
   }
   return op;
 }
-
-void freeMemory(Sent *s){
-  
-}
-void Cad(Sent *s){
-  int op;
-  while(1){
-    printf("Selecione a opção de cadastro:\n");
-    op=printLUVMenu();
-    if(op==0) return;
-    if(op==1){//livro
-      ListB *bnew;
-      bnew=(ListB *)malloc(sizeof(ListB));
-      bnew->book=(Book *)malloc(sizeof(Book));//coreção de erro que o programa fechava sozinho
-
-      printf("Digite as seguintes informações:\n");
-      printf("Título: ");
-      scanf("%s", bnew->book->title);
-      printf("Autor: ");
-      scanf("%s", bnew->book->author);
-      printf("Ano de publicação: ");
-      scanf("%d", &bnew->book->year);
-      bnew->book->status=0;
-      bnew->book->userb=NULL;
-
-      if(s->firstB==NULL){
-        s->firstB=bnew;
-        s->lastB=bnew;
-        bnew->next=NULL;
-        bnew->prev=NULL;
-        bnew->book->id=1;
-      }else{
-        s->lastB->next=bnew;
-        bnew->prev=s->lastB;
-        bnew->next=NULL;
-        bnew->book->id=s->lastB->book->id+1;
-        s->lastB=bnew;
-      }
-      printf("Livro Cadastrado com Sucesso! (ID:%d)\n", bnew->book->id);
-      s->qtBooks++;
-    }
-    if(op==2){//usuário
-      ListU *unew;
-      int fail=0;
-      unew=(ListU *)malloc(sizeof(ListU));
-      unew->user=(User *)malloc(sizeof(User));
-
-      printf("Digite as seguintes informações:\n");
-      printf("Email: ");
-      scanf("%s", unew->user->email);
-      for(ListU *aux=s->firstU;aux!=NULL;aux=aux->next){//vai precisar da biblioteca string.h
-        if(unew->user->email==aux->user->email){
-          printf("Email já existente!\n");
-          Sent u={unew,unew, NULL, NULL,1,0};
-          freeMemory(&u);
-          fail=1;
-          break;
-        }
-      }
-      if(fail==1)break;
-      printf("Nome (sem espaços): ");
-      scanf("%s", unew->user->uname);
-
-      if(s->firstU==NULL){
-        s->firstU=unew;
-        s->lastU=unew;
-        unew->next=NULL;
-        unew->prev=NULL;
-      }else{
-        s->lastU->next=unew;
-        unew->prev=s->lastU;
-        unew->next=NULL;
-        s->lastU=unew;
-      }
-      printf("Usuário cadastrado com sucesso!\n");
-      s->qtUsers++;
-    }
-  }
-}
-
-int printLUEVMenu(){
-  int op;
-  printf("1. Livros\n");
-  printf("2. Usuários\n");
-  printf("3. Empréstimos\n");
-  printf("0. Voltar\n");
-  scanf("%d", &op);
-  if (op>3 || op<0){
-    printf("Opção inexistente!\n");
-    return 0;
-  }
-  return op;
-}
-
 ListB *searchBookID(Sent *s, int id){
   ListB *aux=s->firstB;
-  for(;aux->next!=NULL;aux=aux->next){
+  for(;aux!=NULL;aux=aux->next){
     if(aux->book->id==id){
       printf("Livro encontrado!:\n");
       return aux;
@@ -158,7 +73,7 @@ ListB *searchBookAu(Sent *s, char *au){
   ListB *aux=s->firstB;
   ListB *AuBooks[s->qtBooks];
   int j=0;
-  for(;aux->next!=NULL; aux=aux->next){
+  for(;aux!=NULL; aux=aux->next){
     int same=1;
     for(int i=0;aux->book->author[i]!='\0' || au[i]!='\0';i++){
       if(aux->book->author[i]!=au[i]){
@@ -231,6 +146,114 @@ ListB *searchUemp(Sent *s, char *em){
   return UBooks[0];//retorna lista de ponteiros
 }
 
+void freeMemory(Sent *s){
+  for(ListB *aux=s->firstB;aux!=NULL;){
+    ListB *auxprev=aux;
+    Book *b=aux->book;
+    aux=aux->next;
+    free(b);
+    free(auxprev);
+  }
+  for(ListU *aux=s->firstU;aux!=NULL;){
+    ListU *auxprev=aux;
+    User *u=aux->user;
+    aux=aux->next;
+    free(u);
+    free(auxprev);
+  }
+  initLists(s);
+  free(s);
+} 
+
+void Cad(Sent *s){
+  int op;
+  while(1){
+    printf("Selecione a opção de cadastro:\n");
+    op=printLUVMenu();
+    if(op==0) return;
+    if(op==1){//livro
+      ListB *bnew;
+      bnew=(ListB *)malloc(sizeof(ListB));
+      bnew->book=(Book *)malloc(sizeof(Book));//coreção de erro que o programa fechava sozinho
+
+      printf("Digite as seguintes informações:\n");
+      printf("Título: ");
+      scanf("%s", bnew->book->title);
+      printf("Autor: ");
+      scanf("%s", bnew->book->author);
+      printf("Ano de publicação: ");
+      scanf("%d", &bnew->book->year);
+      bnew->book->status=0;
+      bnew->book->userb=NULL;
+
+      if(s->firstB==NULL){
+        s->firstB=bnew;
+        s->lastB=bnew;
+        bnew->next=NULL;
+        bnew->prev=NULL;
+        bnew->book->id=1;
+      }else{
+        s->lastB->next=bnew;
+        bnew->prev=s->lastB;
+        bnew->next=NULL;
+        bnew->book->id=s->lastB->book->id+1;
+        s->lastB=bnew;
+      }
+      printf("Livro Cadastrado com Sucesso! (ID:%d)\n", bnew->book->id);
+      s->qtBooks++;
+    }
+    if(op==2){//usuário
+      ListU *unew;
+      int fail=0;
+      unew=(ListU *)malloc(sizeof(ListU));
+      unew->user=(User *)malloc(sizeof(User));
+
+      printf("Digite as seguintes informações:\n");
+      printf("Email: ");
+      scanf("%s", unew->user->email);
+      ListU *u=searchUemail(s, unew->user->email);
+      if(u!=NULL){
+        printf("Email já existente!\n");
+        Sent u={unew,unew, NULL, NULL,1,0};
+        freeMemory(&u);
+        fail=1;
+        break;
+      }
+      if(fail==1)break;
+      printf("Nome (sem espaços): ");
+      scanf("%s", unew->user->uname);
+
+      if(s->firstU==NULL){
+        s->firstU=unew;
+        s->lastU=unew;
+        unew->next=NULL;
+        unew->prev=NULL;
+      }else{
+        s->lastU->next=unew;
+        unew->prev=s->lastU;
+        unew->next=NULL;
+        s->lastU=unew;
+      }
+      printf("Usuário cadastrado com sucesso!\n");
+      s->qtUsers++;
+    }
+  }
+}
+
+int printLUEVMenu(){
+  int op;
+  printf("1. Livros\n");
+  printf("2. Usuários\n");
+  printf("3. Empréstimos\n");
+  printf("0. Voltar\n");
+  scanf("%d", &op);
+  if (op>3 || op<0){
+    printf("Opção inexistente!\n");
+    return 0;
+  }
+  return op;
+}
+
 void Con(Sent *s){
   int op;
   while(1){
@@ -264,7 +287,7 @@ void Con(Sent *s){
         scanf("%s", au);
         aubooks=searchBookAu(s, au);
         if(aubooks==NULL) return;
-        for(ListB *aux=aubooks;aux!=NULL;aux=aux+1){
+        for(ListB *aux=aubooks;aux!=NULL;aux=aux+(sizeof(ListB))){
           printf("Título: %s\n",aux->book->title);
           printf("Ano: %d\n",aux->book->year);          
           printf("Autor: %s\n",aux->book->author);
@@ -308,7 +331,7 @@ void Con(Sent *s){
         ListB *bks=searchUemp(s, em);
         if(bks==NULL) return;
         int i=1;
-        for(ListB *aux=bks;aux!=NULL;aux=aux+1){//precisa pular um espaço do vetor
+        for(ListB *aux=bks;aux!=NULL;aux=aux+(sizeof(ListB))){//precisa pular um espaço do vetor
           printf("==Livro %d==\n", i);
           printf("Título: %s\n",aux->book->title);
           printf("Ano: %ds\n",aux->book->year);          
@@ -418,9 +441,37 @@ void Exc(Sent *s){
       scanf("%d", &id);
       ListB *b=searchBookID(s, id);
       if(b==NULL) return;
-
-      //
-
+      ListB *aux=b;
+      Book *auxb=b->book;
+      if(b==s->firstB && b==s->lastB){
+        s->firstB=NULL;
+        s->lastB=NULL;
+        free(auxb);
+        free(aux);
+        s->qtBooks--;
+      }else{
+        if(b==s->firstB){
+          s->firstB=b->next;
+          b->next->prev=NULL;
+          free(auxb);
+          free(aux);
+          s->qtBooks--;
+        }else{
+          if(b==s->lastB){
+            s->lastB=b->prev;
+            b->prev->next=NULL;
+            free(auxb);
+            free(aux);
+            s->qtBooks--;
+          }else{
+            b->prev->next=b->next;
+            b->next->prev=aux->prev;
+            free(auxb);
+            free(aux);
+            s->qtBooks--;
+          }
+        }
+      }
     }
     if(op==2){//usuário
       char em[SIZEMAIL];
@@ -428,9 +479,44 @@ void Exc(Sent *s){
       scanf("%s", em);
       ListU *u=searchUemail(s, em);
       if(u==NULL) return;
-
-      //
-
+      ListB *bks=searchUemp(s, em);
+      if(bks!=NULL){
+        for(ListB *aux=bks;aux!=NULL;aux=aux+(sizeof(ListB))){
+          bks->book->userb=NULL;
+          bks->book->status=0;
+        }
+      }
+      ListU *aux=u;
+      User *auxu=u->user;
+      if(u==s->firstU && u==s->lastU){
+        s->firstU=NULL;
+        s->lastU=NULL;
+        free(auxu);
+        free(aux);
+        s->qtUsers--;
+      }else{
+        if(u==s->firstU){
+          s->firstU=u->next;
+          u->next->prev=NULL;
+          free(auxu);
+          free(aux);
+          s->qtUsers--;
+        }else{
+          if(u==s->lastU){
+            s->lastU=u->prev;
+            u->prev->next=NULL;
+            free(auxu);
+            free(aux);
+            s->qtUsers--;
+          }else{
+            u->prev->next=u->next;
+            u->next->prev=aux->prev;
+            free(auxu);
+            free(aux);
+            s->qtUsers--;
+          }
+        }
+      }
     }
   }
 }
@@ -468,15 +554,6 @@ void Dev(Sent *s){
   b->book->userb=NULL;
   b->book->status=0;
   printf("Livro devolvido com sucesso!\n");
-}
-
-void initLists(Sent *s){
-  s->firstU=NULL;
-  s->lastU=NULL;
-  s->firstB=NULL;
-  s->lastB=NULL;
-  s->qtUsers=0;
-  s->qtBooks=0;
 }
 
 void printMainMenu(){
