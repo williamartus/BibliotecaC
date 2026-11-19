@@ -17,7 +17,7 @@ typedef struct tbook{
   int year;
   int id;
   int status;
-  User* userb;
+  User *userb;
 }Book;
 
 typedef struct tlistU{
@@ -247,6 +247,7 @@ void Con(Sent *s){
         printf("Digite o ID do livro: ");
         scanf("%d", &id);
         b=searchBookID(s, id);
+        if(b==NULL) return;
         printf("Título: %s\n",b->book->title);
         printf("Ano: %d\n",b->book->year);          
         printf("Autor: %s\n",b->book->author);
@@ -262,6 +263,7 @@ void Con(Sent *s){
         printf("Digite o nome do Autor: ");
         scanf("%s", au);
         aubooks=searchBookAu(s, au);
+        if(aubooks==NULL) return;
         for(ListB *aux=aubooks;aux!=NULL;aux=aux+1){
           printf("Título: %s\n",aux->book->title);
           printf("Ano: %d\n",aux->book->year);          
@@ -284,6 +286,7 @@ void Con(Sent *s){
         printf("Digite o Email do usuário: ");
         scanf("%s", em);
         ListU *u=searchUemail(s, em);
+        if(u==NULL) return;
         printf("Nome: %s",u->user->uname);
         printf("Email: %s",u->user->email);
       }
@@ -292,6 +295,7 @@ void Con(Sent *s){
         printf("Digite o Nome do usuário: ");
         scanf("%s", na);
         ListU *u=searchUname(s, na);
+        if(u==NULL) return;
         printf("Nome: %s",u->user->uname);
         printf("Email: %s",u->user->email);
       }
@@ -302,6 +306,7 @@ void Con(Sent *s){
         printf("Digite o Email do usuário: ");
         scanf("%s", em);
         ListB *bks=searchUemp(s, em);
+        if(bks==NULL) return;
         int i=1;
         for(ListB *aux=bks;aux!=NULL;aux=aux+1){//precisa pular um espaço do vetor
           printf("==Livro %d==\n", i);
@@ -388,6 +393,7 @@ void Atu(Sent *s){
       printf("Digite o email do usuário a ser atualizado: ");
       scanf("%s", e);
       ListU *u=searchUemail(s, e);
+      if(u==NULL) return;
       char n[SIZEUNAME];
       printf("Digite o novo nome do usuário: ");
       scanf("%s", n);
@@ -407,20 +413,61 @@ void Exc(Sent *s){
     op=printLUVMenu();
     if(op==0) return;
     if(op==1){//livro
+      int id;
+      printf("Digite o id do livro a ser excluído: ");
+      scanf("%d", &id);
+      ListB *b=searchBookID(s, id);
+      if(b==NULL) return;
+
+      //
 
     }
     if(op==2){//usuário
+      char em[SIZEMAIL];
+      printf("Digite o email do usuário a ser excluído: ");
+      scanf("%s", em);
+      ListU *u=searchUemail(s, em);
+      if(u==NULL) return;
+
+      //
 
     }
   }
 }
 
 void Emp(Sent *s){
-
+  int id;
+  printf("Digite o ID do livro a ser emprestado: ");
+  scanf("%d", &id);
+  ListB *b=searchBookID(s, id);
+  if(b==NULL) return;
+  if(b->book->status==1){
+    printf("Livro já emprestado!\n");
+    return;
+  }
+  char em[SIZEMAIL];
+  printf("Digite o email do usuário a emprestar: ");
+  scanf("%s", em);
+  ListU *u=searchUemail(s, em);
+  if(u==NULL) return;
+  b->book->userb=u->user;
+  b->book->status=1;
+  printf("Livro emprestado com sucesso!\n");
 }
 
 void Dev(Sent *s){
-
+  int id;
+  printf("Digite o ID do livro a ser devolvido: ");
+  scanf("%d", &id);
+  ListB *b=searchBookID(s, id);
+  if(b==NULL) return;
+  if(b->book->status==0){
+    printf("Livro já disponível!\n");
+    return;
+  }
+  b->book->userb=NULL;
+  b->book->status=0;
+  printf("Livro devolvido com sucesso!\n");
 }
 
 void initLists(Sent *s){
