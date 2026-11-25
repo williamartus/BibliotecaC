@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+//#include <windows.h>
+
+//COMITS DISPONÍVEIS EM: https://github.com/williamartus/BibliotecaC/commits
 
 #define SIZEMAIL 50
 #define SIZEUNAME 50
@@ -81,7 +84,7 @@ void printBookAu(Sent *s, char *au){
       }
     }
     if(same==1){
-      printf("==Livro %d==\n", j);
+      printf("==Livro %d==\n", j+1);
       printf("Título: %s\n",aux->book->title);
       printf("Ano: %d\n",aux->book->year);          
       printf("Autor: %s\n",aux->book->author);
@@ -107,7 +110,6 @@ ListU *searchUemail(Sent *s, char *em){
     }
     if(same==1) return aux;
   }
-  printf("Usuário não encontrado!\n");
   return NULL;
 }
 
@@ -138,15 +140,11 @@ void printUemp(Sent *s, char *em){
         }
       }
       if(same==1){
-        printf("==Livro %d==\n", j);
+        printf("==Livro %d==\n", j+1);
         printf("Título: %s\n",aux->book->title);
-        printf("Ano: %ds\n",aux->book->year);          
+        printf("Ano: %d\n",aux->book->year);          
         printf("Autor: %s\n",aux->book->author);
         printf("ID: %d\n",aux->book->id);
-        if(aux->book->status==1){
-          printf("Status: Emprestado\n");
-          printf("Emprestado por %s\n",aux->book->userb->uname);
-        }else printf("Status: Disponível\n");
         j++;
       }
     }
@@ -301,9 +299,12 @@ void Con(Sent *s){
         printf("Digite o Email do usuário: ");
         scanf("%s", em);
         ListU *u=searchUemail(s, em);
-        if(u==NULL) return;
-        printf("Nome: %s",u->user->uname);
-        printf("Email: %s",u->user->email);
+        if(u==NULL){
+          printf("Usuário não encontrado!\n");
+          return;
+        }
+        printf("Nome: %s\n",u->user->uname);
+        printf("Email: %s\n",u->user->email);
       }
       if(op2==2){//nome
         char na[SIZEUNAME];
@@ -311,8 +312,8 @@ void Con(Sent *s){
         scanf("%s", na);
         ListU *u=searchUname(s, na);
         if(u==NULL) return;
-        printf("Nome: %s",u->user->uname);
-        printf("Email: %s",u->user->email);
+        printf("Nome: %s\n",u->user->uname);
+        printf("Email: %s\n",u->user->email);
       }
     }
     if(op==3){//empréstimo
@@ -396,7 +397,10 @@ void Atu(Sent *s){
       printf("Digite o email do usuário a ser atualizado: ");
       scanf("%s", e);
       ListU *u=searchUemail(s, e);
-      if(u==NULL) return;
+      if(u==NULL){
+        printf("Usuário não encontrado!\n");
+        return;
+      } 
       char n[SIZEUNAME];
       printf("Digite o novo nome do usuário: ");
       scanf("%s", n);
@@ -453,13 +457,17 @@ void Exc(Sent *s){
           }
         }
       }
+      printf("Livro excluído!\n");
     }
     if(op==2){//usuário
       char em[SIZEMAIL];
       printf("Digite o email do usuário a ser excluído: ");
       scanf("%s", em);
       ListU *u=searchUemail(s, em);
-      if(u==NULL) return;
+      if(u==NULL){
+        printf("Usuário não encontrado!\n");
+        return;
+      }
       for(ListB *i=s->firstB;i!=NULL;i=i->next){
         if(i->book->userb==u->user){
           i->book->userb=NULL;
@@ -497,6 +505,7 @@ void Exc(Sent *s){
           }
         }
       }
+      printf("Usuário excluído!\n");
     }
   }
 }
@@ -515,7 +524,10 @@ void Emp(Sent *s){
   printf("Digite o email do usuário a emprestar: ");
   scanf("%s", em);
   ListU *u=searchUemail(s, em);
-  if(u==NULL) return;
+  if(u==NULL){
+    printf("Usuário não encontrado!\n");
+    return;
+  }
   b->book->userb=u->user;
   b->book->status=1;
   printf("Livro emprestado com sucesso!\n");
@@ -536,12 +548,92 @@ void Dev(Sent *s){
   printf("Livro devolvido com sucesso!\n");
 }
 
+void printListbID(Sent *s){
+  if(s->firstB==NULL){
+    printf("Lista vazia!\n");
+    return;
+  }
+  for(ListB *b=s->firstB;b!=NULL;b=b->next){
+    printf("==Livro de ID %d==\n", b->book->id);
+    printf("Título: %s\n",b->book->title);
+    printf("Ano: %d\n",b->book->year);          
+    printf("Autor: %s\n",b->book->author);
+    if(b->book->status==1){
+      printf("Status: Emprestado\n");
+      printf("Emprestado por %s\n",b->book->userb->uname);
+    }else printf("Status: Disponível\n");
+  }
+}
+
+void printListbEmp(Sent *s){
+  if(s->firstB==NULL){
+    printf("Lista vazia!\n");
+    return;
+  }
+  for(ListB *b=s->firstB;b!=NULL;b=b->next){
+    if(b->book->status==1){
+      printf("==Livro de ID %d==\n", b->book->id);
+      printf("Título: %s\n",b->book->title);
+      printf("Ano: %d\n",b->book->year);          
+      printf("Autor: %s\n",b->book->author);
+      printf("ID: %d\n",b->book->id);
+      printf("Emprestado por %s\n",b->book->userb->uname);
+    }
+  }
+}
+
+void printListbDis(Sent *s){
+  if(s->firstB==NULL){
+    printf("Lista vazia!\n");
+    return;
+  }
+  for(ListB *b=s->firstB;b!=NULL;b=b->next){
+    if(b->book->status==0){
+      printf("==Livro de ID %d==\n", b->book->id);
+      printf("Título: %s\n",b->book->title);
+      printf("Ano: %d\n",b->book->year);          
+      printf("Autor: %s\n",b->book->author);
+      printf("ID: %d\n",b->book->id);
+    }
+  }
+}
+
+void printListU(Sent *s){
+  if(s->firstU==NULL){
+    printf("Lista vazia!\n");
+    return;
+  }
+  int i=1;
+  for(ListU *u=s->firstU;u!=NULL;u=u->next){
+    printf("==Usuário %d==\n",i);
+    printf("Nome: %s\n",u->user->uname);          
+    printf("Email: %s\n",u->user->email);
+    printf("Livros emprestados: \n");
+    printUemp(s,u->user->email);
+    i++;
+  }
+}
+
+void printEstMenu(Sent *s){
+  int op;
+  printf("DIGITE O QUE DESEJA CONSULTAR:\n");
+  printf("1. Lista completa de livros por ID\n2. Livros emprestados\n3. Livros disponíveis\n4. Lista completa de usuários\n0. Voltar\n");
+  scanf("%d", &op);
+  if(op==0) return;
+  if(op==1) printListbID(s);
+  if(op==2) printListbEmp(s);
+  if(op==3) printListbDis(s);
+  if(op==4) printListU(s);
+  if(op>4 || op<0)printf("Opção inexistente!\n");
+}
+
 void printMainMenu(){
   printf("DIGITE A OPERAÇÃO:\n");
-  printf("1. Cadastro\n2. Consulta\n3. Atualização\n4. Exclusão\n5. Empréstimo\n6. Devolução\n0. Sair\n");
+  printf("1. Cadastro\n2. Consulta\n3. Atualização\n4. Exclusão\n5. Empréstimo\n6. Devolução\n7. Estatísticas\n0. Sair\n");
 }
 
 int main(){
+  //SetConsoleOutputCP(CP_UTF8);
   int op;
   printf("INICIANDO BIBLIOTECA...\n");
   Sent s;
@@ -550,6 +642,7 @@ int main(){
     printMainMenu();
     scanf("%d", &op);
     if(op==0){
+      printf("ENCERRANDO BIBLIOTECA...\n");
       freeMemory(&s);
       break;
     }
@@ -571,7 +664,11 @@ int main(){
               if(op==6){
                 Dev(&s);
               }else{
-                printf("Opção inexistente!\n\n");
+                if(op==7){
+                  printEstMenu(&s);
+                }else{
+                  printf("Opção inexistente!\n\n");
+                }
               }
             }
           }
@@ -579,6 +676,5 @@ int main(){
       }
     }
   }
-  printf("ENCERRANDO BIBLIOTECA...\n");
   return 0;
 }
